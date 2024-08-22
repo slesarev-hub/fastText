@@ -16,6 +16,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 #include "args.h"
 #include "real.h"
@@ -91,6 +92,7 @@ class Dictionary {
   uint32_t hash(const std::string_view str) const;
   void add(const std::string&);
   bool readWord(std::istream&, std::string&) const;
+  void createDictionary(std::function<bool(std::string&)>);
   void readFromFile(std::istream&);
   std::string getLabel(int32_t) const;
   void save(std::ostream&) const;

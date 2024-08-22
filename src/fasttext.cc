@@ -743,17 +743,30 @@ std::shared_ptr<Matrix> FastText::createTrainOutputMatrix() const {
 void FastText::train(const Args& args, const TrainCallback& callback) {
   args_ = std::make_shared<Args>(args);
   dict_ = std::make_shared<Dictionary>(args_);
-  if (args_->input == "-") {
-    // manage expectations
-    throw std::invalid_argument("Cannot use stdin for training!");
+  if (args_->vector_input.empty()) {
+      if (args_->input == "-") {
+          // manage expectations
+          throw std::invalid_argument("Cannot use stdin for training!");
+      }
+      std::ifstream ifs(args_->input);
+      if (!ifs.is_open()) {
+          throw std::invalid_argument(
+                  args_->input + " cannot be opened for training!");
+      }
+      dict_->readFromFile(ifs);
+      ifs.close();
+  } else {
+      auto it = args_->vector_input.begin();
+      auto end = args_->vector_input.end();
+      dict_->createDictionary([&it, &end](std::string &word) {
+          if (it == end) {
+              return false;
+          }
+          word = *it;
+          ++it;
+          return true;
+      });
   }
-  std::ifstream ifs(args_->input);
-  if (!ifs.is_open()) {
-    throw std::invalid_argument(
-        args_->input + " cannot be opened for training!");
-  }
-  dict_->readFromFile(ifs);
-  ifs.close();
 
   if (!args_->pretrainedVectors.empty()) {
     input_ = getInputMatrixFromFile(args_->pretrainedVectors);

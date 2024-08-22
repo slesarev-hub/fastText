@@ -37,6 +37,8 @@ class Args {
  public:
   Args();
   std::string input;
+  // for cases when used as library
+  std::vector<std::string> vector_input;
   std::string output;
   double lr;
   int lrUpdateRate;
